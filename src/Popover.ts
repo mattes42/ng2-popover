@@ -42,8 +42,12 @@ export class Popover implements OnChanges {
     @Input()
     popoverTitle: string;
 
+    // how many milliseconds should the display of the popover be delayed
     @Input()
-    popoverOnHover: boolean = false;
+    delayBeforeShow: number = 0;
+
+    @Input()
+    popoverOnHover: boolean = true;
 
     @Input()
     popoverCloseOnClickOutside: boolean;
@@ -60,12 +64,17 @@ export class Popover implements OnChanges {
     @Output()
     onHidden = new EventEmitter<Popover>();
 
+    // when the display of a popover is delayed, and the mouse has already left the div,
+    // this flag controls if the popover is shown, at all
+    private mouseLeft:boolean = false;
+
     // -------------------------------------------------------------------------
     // Event listeners
     // -------------------------------------------------------------------------
 
     @HostListener("click")
     showOrHideOnClick(): void {
+        this.mouseLeft = true;
         if (this.popoverOnHover) return;
         if (this.popoverDisabled) return;
         this.toggle();
@@ -74,14 +83,24 @@ export class Popover implements OnChanges {
     @HostListener("focusin")
     @HostListener("mouseenter")
     showOnHover(): void {
+        this.mouseLeft = false;
         if (!this.popoverOnHover) return;
         if (this.popoverDisabled) return;
-        this.show();
+        if (this.delayBeforeShow == 0) {
+            this.show();
+        } else {
+            setTimeout(() => {
+                if (!this.mouseLeft) {
+                    this.show();
+                }
+            }, this.delayBeforeShow);
+        }
     }
 
     @HostListener("focusout")
     @HostListener("mouseleave")
     hideOnHover(): void {
+        this.mouseLeft = true;
         if (this.popoverCloseOnMouseOutside) return; // don't do anything since not we control this
         if (!this.popoverOnHover) return;
         if (this.popoverDisabled) return;
