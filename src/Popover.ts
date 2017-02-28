@@ -44,7 +44,7 @@ export class Popover implements OnChanges {
 
     // how many milliseconds should the display of the popover be delayed
     @Input()
-    delayBeforeShow: number = 0;
+    delayBeforeShow: number = 500;
 
     @Input()
     popoverOnHover: boolean = true;
